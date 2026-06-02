@@ -10,7 +10,7 @@ export interface LoginVo {
 }
 
 export interface UserInfoVo {
-  userId: number
+  userId: string
   username: string
   nickname: string
   roles: string[]

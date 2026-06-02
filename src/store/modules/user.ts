@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getUserInfo, login, logout as logoutApi } from '@/api/auth'
+import { resetRouter } from '@/router/index'
+import { usePermissionStore } from '@/store/modules/permission'
 import type { LoginBody, UserInfoVo } from '@/types/auth'
 
 // 用户态是登录闭环的前端单一事实源：
@@ -36,11 +38,14 @@ export const useUserStore = defineStore('user', () => {
 
   // 清本地态是所有退出路径的最终兜底：无论主动退出、401 还是 getInfo 失败，都必须回到未登录状态。
   const logout = () => {
+    const permissionStore = usePermissionStore()
     token.value = ''
     userInfo.value = null
     roles.value = []
     permissions.value = []
     localStorage.removeItem('Token')
+    resetRouter()
+    permissionStore.resetRoutes()
   }
 
   const logoutAction = async () => {

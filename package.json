@@ -19,6 +19,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.34.1",
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
     "axios": "^1.16.1",
     "element-plus": "^2.14.1",
     "pinia": "^3.0.4",

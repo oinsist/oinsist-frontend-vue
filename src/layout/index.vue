@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/modules/user'
+import Sidebar from './components/Sidebar/index.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -14,7 +15,7 @@ const handleLogout = async () => {
 <template>
   <div class="layout">
     <aside class="layout__aside">
-      <!-- P04: 侧边栏菜单将在权限路由接入后填充 -->
+      <Sidebar />
     </aside>
     <section class="layout__main">
       <header class="layout__header">
