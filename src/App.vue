@@ -1,19 +1,7 @@
-<script setup lang="ts">
-console.log('[env]', import.meta.env.VITE_APP_BASE_API)
-</script>
+<script setup lang="ts"></script>
 
 <template>
-  <main class="app">
-    <h1>Hello</h1>
-  </main>
+  <router-view />
 </template>
 
-<style scoped>
-.app {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: Inter, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-}
-</style>
+<style scoped lang="scss"></style>

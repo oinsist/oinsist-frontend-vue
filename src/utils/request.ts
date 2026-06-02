@@ -37,11 +37,11 @@ instance.interceptors.request.use(
     if (config.isToken !== false) {
       const userStore = useUserStore()
       if (userStore.token) {
-        config.headers.set('Authorization', 'Bearer ' + userStore.token)
+        config.headers.set('Authorization', userStore.token)
       }
     }
-    // 多租户场景下后端强校验该头，缺失会直接 403
-    config.headers.set('Tenant-Id', '000000')
+    // 后端从 Session 派生租户，此头为多租户演进预留，当前 no-op
+    config.headers.set('Tenant-Id', '1')
     return config
   },
   (error: AxiosError) => Promise.reject(error),
