@@ -9,6 +9,10 @@ const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
+defineOptions({
+  name: 'LoginView',
+})
+
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const form = reactive<LoginBody>({
@@ -24,8 +28,8 @@ const rules: FormRules<LoginBody> = {
 
 const getRedirect = () => {
   const redirect = route.query.redirect
-  if (Array.isArray(redirect)) return redirect[0] ?? '/'
-  return redirect ?? '/'
+  const value = Array.isArray(redirect) ? redirect[0] : redirect
+  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : '/'
 }
 
 const handleSubmit = async () => {

@@ -10,6 +10,10 @@ router.beforeEach(async (to, _from, next) => {
 
   // 白名单必须先放行登录页：否则未登录跳 /login 时会再次进入守卫并形成循环跳转。
   if (whiteList.includes(to.path)) {
+    if (to.path === '/login' && userStore.token) {
+      next('/')
+      return
+    }
     next()
     return
   }

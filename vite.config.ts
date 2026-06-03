@@ -4,6 +4,13 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [vue()],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler',
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -22,6 +29,14 @@ export default defineConfig({
     },
   },
   build: {
-    // 【P0X 打包瘦身预留】后续有业务体量后再配置 manualChunks / chunkSizeWarningLimit。
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'element-plus': ['element-plus', '@element-plus/icons-vue'],
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+        },
+      },
+    },
   },
 })

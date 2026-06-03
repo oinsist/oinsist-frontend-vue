@@ -39,6 +39,7 @@ const resolveComponent = (component: string) => {
 
 const transformRoute = (route: RouterVo, isRoot = false): DynamicRouteRecordRaw => {
   const children = (route.children ?? []).map((child) => transformRoute(child))
+  const redirectChild = children.find((child) => !child.hidden) ?? children[0]
   const record = {
     path: route.path,
     name: route.name,
@@ -50,7 +51,7 @@ const transformRoute = (route: RouterVo, isRoot = false): DynamicRouteRecordRaw 
     hidden: route.hidden,
     ...(children.length > 0 ? { children } : {}),
     ...(isRoot && children.length > 0 && route.component === 'Layout'
-      ? { redirect: joinRoutePath(route.path, children[0].path) }
+      ? { redirect: joinRoutePath(route.path, redirectChild.path) }
       : {}),
   } as DynamicRouteRecordRaw
 

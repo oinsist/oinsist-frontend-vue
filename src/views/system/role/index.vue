@@ -16,6 +16,7 @@ import {
   listRole,
   updateRole,
 } from '@/api/system/role'
+import { formatDateTime } from '@/utils/formatTime'
 import type { PageQuery } from '@/types/common'
 import type { SysMenuVo } from '@/types/system/menu'
 import type { SysRoleAddDto, SysRoleEditDto, SysRoleVo } from '@/types/system/role'
@@ -236,7 +237,11 @@ onMounted(() => {
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="createTime" label="创建时间" min-width="180" />
+      <el-table-column label="创建时间" min-width="180">
+        <template #default="{ row }: { row: SysRoleVo }">
+          {{ formatDateTime(row.createTime) }}
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="240" fixed="right">
         <template #default="{ row }: { row: SysRoleVo }">
           <el-button

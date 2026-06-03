@@ -10,9 +10,14 @@ import {
   listUser,
   updateUser,
 } from '@/api/system/user'
+import { formatDateTime } from '@/utils/formatTime'
 import type { PageQuery } from '@/types/common'
 import type { SysRoleVo } from '@/types/system/role'
 import type { SysUserAddDto, SysUserEditDto, SysUserVo } from '@/types/system/user'
+
+defineOptions({
+  name: 'SystemUser',
+})
 
 type DialogMode = 'add' | 'edit'
 type UserStatus = SysUserVo['status']
@@ -221,7 +226,11 @@ onMounted(() => {
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="createTime" label="创建时间" min-width="180" />
+      <el-table-column label="创建时间" min-width="180">
+        <template #default="{ row }: { row: SysUserVo }">
+          {{ formatDateTime(row.createTime) }}
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="240" fixed="right">
         <template #default="{ row }: { row: SysUserVo }">
           <el-button

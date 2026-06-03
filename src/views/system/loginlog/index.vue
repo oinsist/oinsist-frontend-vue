@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { deleteLoginLog, listLoginLog } from '@/api/system/loginLog'
+import { formatDateTime } from '@/utils/formatTime'
 import type { PageQuery } from '@/types/common'
 import type { SysLoginLogVo } from '@/types/system/log'
 
@@ -103,7 +104,11 @@ onMounted(() => {
       <el-table-column prop="ip" label="IP" min-width="130" show-overflow-tooltip />
       <el-table-column prop="msg" label="提示消息" min-width="180" show-overflow-tooltip />
       <el-table-column prop="userAgent" label="浏览器" min-width="240" show-overflow-tooltip />
-      <el-table-column prop="loginTime" label="登录时间" min-width="180" />
+      <el-table-column label="登录时间" min-width="180">
+        <template #default="{ row }: { row: SysLoginLogVo }">
+          {{ formatDateTime(row.loginTime) }}
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="90" fixed="right">
         <template #default="{ row }: { row: SysLoginLogVo }">
           <el-button

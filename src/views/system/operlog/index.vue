@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { deleteOperLog, listOperLog } from '@/api/system/operLog'
+import { formatDateTime } from '@/utils/formatTime'
 import type { PageQuery } from '@/types/common'
 import type { SysOperLogVo } from '@/types/system/log'
 
@@ -130,7 +131,11 @@ onMounted(() => {
       <el-table-column label="耗时" width="100">
         <template #default="{ row }: { row: SysOperLogVo }">{{ row.duration }}ms</template>
       </el-table-column>
-      <el-table-column prop="operTime" label="操作时间" min-width="180" />
+      <el-table-column label="操作时间" min-width="180">
+        <template #default="{ row }: { row: SysOperLogVo }">
+          {{ formatDateTime(row.operTime) }}
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="120" fixed="right">
         <template #default="{ row }: { row: SysOperLogVo }">
           <el-button type="primary" link @click="openDetailDialog(row)">详情</el-button>
@@ -187,7 +192,7 @@ onMounted(() => {
         <el-descriptions-item label="IP">{{ currentDetail.ip }}</el-descriptions-item>
         <el-descriptions-item label="耗时">{{ currentDetail.duration }}ms</el-descriptions-item>
         <el-descriptions-item label="操作时间" :span="2">
-          {{ currentDetail.operTime }}
+          {{ formatDateTime(currentDetail.operTime) }}
         </el-descriptions-item>
       </el-descriptions>
       <template #footer>
