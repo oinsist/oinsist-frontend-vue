@@ -41,3 +41,20 @@ export const deleteUser = (userId: string) => {
     method: 'delete',
   })
 }
+
+export const getUserRoleIds = (userId: string) => {
+  return request<string[]>({
+    // 角色预勾选依赖后端返回当前全量角色 ID，前端后续统一 String() 归一化匹配。
+    url: `/system/user/${userId}/roleIds`,
+    method: 'get',
+  })
+}
+
+export const assignUserRoles = (userId: string, roleIds: string[]) => {
+  return request<void>({
+    // assignRole 是覆盖语义，提交的 roleIds 即该用户最终角色集合。
+    url: `/system/user/${userId}/assignRole`,
+    method: 'put',
+    data: roleIds,
+  })
+}

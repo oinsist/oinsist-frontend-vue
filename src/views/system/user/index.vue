@@ -1,8 +1,17 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
-import { addUser, deleteUser, listUser, updateUser } from '@/api/system/user'
+import { listRole } from '@/api/system/role'
+import {
+  addUser,
+  assignUserRoles,
+  deleteUser,
+  getUserRoleIds,
+  listUser,
+  updateUser,
+} from '@/api/system/user'
 import type { PageQuery } from '@/types/common'
+import type { SysRoleVo } from '@/types/system/role'
 import type { SysUserAddDto, SysUserEditDto, SysUserVo } from '@/types/system/user'
 
 type DialogMode = 'add' | 'edit'
@@ -37,6 +46,15 @@ const form = reactive<UserForm>({
 
 const dialogTitle = computed(() => (dialogMode.value === 'add' ? '新增用户' : '编辑用户'))
 const isEdit = computed(() => dialogMode.value === 'edit')
+
+const assignDialogVisible = ref(false)
+const assignLoading = ref(false)
+const assignSubmitting = ref(false)
+const assignReady = ref(false)
+const assignUserId = ref('')
+const assignUsername = ref('')
+const roleOptions = ref<SysRoleVo[]>([])
+const selectedRoleIds = ref<string[]>([])
 
 const rules: FormRules<UserForm> = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
@@ -132,6 +150,53 @@ const handleDelete = async (row: SysUserVo) => {
   }
 }
 
+const resetAssignModel = () => {
+  assignUserId.value = ''
+  assignUsername.value = ''
+  roleOptions.value = []
+  selectedRoleIds.value = []
+  assignReady.value = false
+}
+
+const openAssignRoleDialog = async (row: SysUserVo) => {
+  resetAssignModel()
+  assignUserId.value = row.userId
+  assignUsername.value = row.username
+  assignDialogVisible.value = true
+  assignLoading.value = true
+
+  try {
+    const [rolePage, currentRoleIds] = await Promise.all([
+      listRole({ pageNum: 1, pageSize: 500 }),
+      getUserRoleIds(row.userId),
+    ])
+    roleOptions.value = rolePage.rows
+    // 后端 Long 在 JSON 中可能表现为 number 或 string；统一转字符串，保证 el-select 预勾选用 === 能匹配。
+    selectedRoleIds.value = currentRoleIds.map((roleId) => String(roleId))
+    assignReady.value = true
+  } catch {
+    // 分配角色是覆盖提交，预加载失败时禁止提交，避免未预勾选导致误清空用户角色。
+    roleOptions.value = []
+    selectedRoleIds.value = []
+    assignReady.value = false
+  } finally {
+    assignLoading.value = false
+  }
+}
+
+const handleAssignSubmit = async () => {
+  if (!assignReady.value) return
+
+  assignSubmitting.value = true
+  try {
+    await assignUserRoles(assignUserId.value, selectedRoleIds.value)
+    ElMessage.success('分配成功')
+    assignDialogVisible.value = false
+  } finally {
+    assignSubmitting.value = false
+  }
+}
+
 onMounted(() => {
   loadList()
 })
@@ -157,12 +222,30 @@ onMounted(() => {
         </template>
       </el-table-column>
       <el-table-column prop="createTime" label="创建时间" min-width="180" />
-      <el-table-column label="操作" width="160" fixed="right">
+      <el-table-column label="操作" width="240" fixed="right">
         <template #default="{ row }: { row: SysUserVo }">
-          <el-button v-hasPermi="['system:user:edit']" type="primary" link @click="openEditDialog(row)">
+          <el-button
+            v-hasPermi="['system:user:edit']"
+            type="primary"
+            link
+            @click="openEditDialog(row)"
+          >
             编辑
           </el-button>
-          <el-button v-hasPermi="['system:user:remove']" type="danger" link @click="handleDelete(row)">
+          <el-button
+            v-hasPermi="['system:user:assignRole']"
+            type="primary"
+            link
+            @click="openAssignRoleDialog(row)"
+          >
+            分配角色
+          </el-button>
+          <el-button
+            v-hasPermi="['system:user:remove']"
+            type="danger"
+            link
+            @click="handleDelete(row)"
+          >
             删除
           </el-button>
         </template>
@@ -189,7 +272,12 @@ onMounted(() => {
           <el-input v-model="form.nickname" placeholder="请输入昵称" />
         </el-form-item>
         <el-form-item v-if="!isEdit" label="密码" prop="password">
-          <el-input v-model="form.password" type="password" show-password placeholder="请输入密码" />
+          <el-input
+            v-model="form.password"
+            type="password"
+            show-password
+            placeholder="请输入密码"
+          />
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="form.status">
@@ -201,6 +289,48 @@ onMounted(() => {
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="handleSubmit">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
+      v-model="assignDialogVisible"
+      title="分配角色"
+      width="520px"
+      @closed="resetAssignModel"
+    >
+      <el-form v-loading="assignLoading" label-width="88px">
+        <el-form-item label="用户">
+          <el-input :model-value="assignUsername" disabled />
+        </el-form-item>
+        <el-form-item label="角色">
+          <el-select
+            v-model="selectedRoleIds"
+            multiple
+            clearable
+            filterable
+            :disabled="!assignReady"
+            placeholder="请选择角色"
+            class="page__select"
+          >
+            <el-option
+              v-for="role in roleOptions"
+              :key="String(role.roleId)"
+              :label="role.roleName"
+              :value="String(role.roleId)"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="assignDialogVisible = false">取消</el-button>
+        <el-button
+          type="primary"
+          :loading="assignSubmitting"
+          :disabled="!assignReady"
+          @click="handleAssignSubmit"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </section>
@@ -232,6 +362,10 @@ onMounted(() => {
     margin-top: 16px;
     display: flex;
     justify-content: flex-end;
+  }
+
+  &__select {
+    width: 100%;
   }
 }
 </style>
