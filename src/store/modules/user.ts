@@ -12,6 +12,7 @@ import type { LoginBody, UserInfoVo } from '@/types/auth'
 export const useUserStore = defineStore('user', () => {
   // 从本地存储恢复 token，保证刷新页面仍可保持登录态
   const token = ref<string>(localStorage.getItem('Token') ?? '')
+  const tenantId = ref<string>(localStorage.getItem('TenantId') ?? '1')
   const userInfo = ref<UserInfoVo | null>(null)
   const roles = ref<string[]>([])
   const permissions = ref<string[]>([])
@@ -24,6 +25,8 @@ export const useUserStore = defineStore('user', () => {
 
   const loginAction = async (data: LoginBody) => {
     const res = await login(data)
+    tenantId.value = data.tenantId
+    localStorage.setItem('TenantId', data.tenantId)
     setToken(res.tokenValue)
     return res
   }
@@ -60,6 +63,7 @@ export const useUserStore = defineStore('user', () => {
 
   return {
     token,
+    tenantId,
     userInfo,
     roles,
     permissions,

@@ -34,14 +34,14 @@ const instance = axios.create({
 instance.interceptors.request.use(
   (config) => {
     // 惰性取 store：拦截器在模块加载期注册，但执行期 Pinia 已就绪
+    const userStore = useUserStore()
     if (config.isToken !== false) {
-      const userStore = useUserStore()
       if (userStore.token) {
         config.headers.set('Authorization', userStore.token)
       }
     }
-    // 后端从 Session 派生租户，此头为多租户演进预留，当前 no-op
-    config.headers.set('Tenant-Id', '1')
+    // 后端当前以登录 Session 中的 tenantId 为准；这里保留请求头，便于后续网关/审计链路读取。
+    config.headers.set('Tenant-Id', userStore.tenantId)
     return config
   },
   (error: AxiosError) => Promise.reject(error),

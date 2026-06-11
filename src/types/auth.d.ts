@@ -1,7 +1,7 @@
 export interface LoginBody {
   username: string
   password: string
-  tenantId: number
+  tenantId: string
 }
 
 export interface LoginVo {
@@ -15,4 +15,9 @@ export interface UserInfoVo {
   nickname: string
   roles: string[]
   permissions: string[]
+}
+
+export interface TenantOptionVo {
+  tenantId: string
+  tenantName: string
 }

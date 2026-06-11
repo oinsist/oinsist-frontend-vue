@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { LoginBody, LoginVo, UserInfoVo } from '@/types/auth'
+import type { LoginBody, LoginVo, TenantOptionVo, UserInfoVo } from '@/types/auth'
 
 export const login = (data: LoginBody) => {
   return request<LoginVo>({
@@ -21,5 +21,13 @@ export const logout = () => {
   return request<void>({
     url: '/auth/logout',
     method: 'post',
+  })
+}
+
+export const listTenantOptions = () => {
+  return request<TenantOptionVo[]>({
+    url: '/auth/tenants',
+    method: 'get',
+    isToken: false,
   })
 }
